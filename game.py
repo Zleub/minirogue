@@ -1,72 +1,124 @@
-import curses, random
+import sys, curses, random
 from character import Character
+from monster import Monster
 from room import Room
+from colors import *
 
 class Game:
     def __init__(self):
         try:
-            stdscr = curses.initscr()
+            self.stdscr = curses.initscr()
             curses.noecho()
             curses.cbreak()
             curses.curs_set(0)
-            stdscr.keypad(1)
+            curses.start_color()
+            curses.use_default_colors()
+            for i in range(0, curses.COLORS):
+                curses.init_pair(i + 1, i, -1)
+            self.stdscr.keypad(1)
         except:
             end() # FAIL
 
-        max_width, max_height = stdscr.getmaxyx()
-        self.screen = stdscr.subwin(max_width, max_height, 0, 0)
+        self.min_room_size = 10
+        self.max_room_size = 30 - self.min_room_size
+        max_width, max_height = self.stdscr.getmaxyx()
+        self.screen = self.stdscr.subwin(max_width, max_height, 0, 0)
+        max_width, max_height = self.screen.getmaxyx()
 
         self.character = Character(self.screen, self)
 
+        self.golds = []
+        self.paths = []
+        self.monsters = []
         self.stack = [
-            Room(self.screen,
-                int(max_width / 2) - 10, int(max_height / 2) - 10,
-                20, 20),
+            Room(self.screen, -7, -5, 10, 20),
         ]
+
         while len(self.stack) != 10:
             self.randomRoom()
             pass
 
-        self.offset = [ 0, 0 ]
+        self.panel = 0
+        self.offset = [ int(max_width/ 2), int(max_height/ 2) ]
         self.logger = [
             'Hello World'
         ]
 
+        self.loop()
+
+    def loop(self):
         while 1:
-            max_width, max_height = stdscr.getmaxyx()
+            max_width, max_height = self.stdscr.getmaxyx()
 
             self.screen.clear()
             self.draw()
             self.character.draw()
-            self.screen.hline(max_width - 8, 0, curses.ACS_HLINE, 77)
+            self.screen.hline(max_width - 8, 0, curses.ACS_HLINE, max_height)
             i = 7
             for v in self.logger:
                 self.screen.addstr(max_width - i, 0, v)
                 i -= 1
 
+            self.screen.addstr(0, 0, self.character.toString())
+
+
             self.screen.refresh()
 
-            c = stdscr.getch()
+            err('----')
+
+            for v in self.monsters:
+                v.update(self.offset)
+
+            c = self.stdscr.getch()
             if (c == curses.KEY_UP
-            and self.character.collides([-1, 0]) ):
+              and self.character.collides([-1, 0]) ):
                 self.offset[0] += 1
+                self.character.x -= 1
             if (c == curses.KEY_DOWN
-            and self.character.collides([1, 0]) ):
+              and self.character.collides([1, 0]) ):
                 self.offset[0] -= 1
+                self.character.x += 1
             if (c == curses.KEY_LEFT
-            and self.character.collides([0, -1]) ):
+              and self.character.collides([0, -1]) ):
                 self.offset[1] += 1
+                self.character.y -= 1
             if (c == curses.KEY_RIGHT
-            and self.character.collides([0, 1]) ):
+              and self.character.collides([0, 1]) ):
                 self.offset[1] -= 1
+                self.character.y += 1
+
+            if (c == 46):
+                self.panel = 1
 
             if int(random.random() * 100) == 0:
                 self.randomNotify()
 
+
             pass
 
     def draw(self):
+        max_width, max_height = self.stdscr.getmaxyx()
+
         for v in self.stack:
+            v.draw(self.offset)
+
+        for v in self.paths:
+            _x = v[0] + self.offset[0]
+            _y = v[1] + self.offset[1]
+            if (_x >= 0 and _y >= 0
+                and _x < max_width - 8 and _y < max_height):
+                # self.screen.addch(_x, _y, ord('\''))
+                self.screen.addstr(_x, _y, '.')
+
+        for v in self.golds:
+            _x = v[0] + self.offset[0]
+            _y = v[1] + self.offset[1]
+            if (_x >= 0 and _y >= 0
+                and _x < max_width - 8 and _y < max_height):
+                # self.screen.addch(_x, _y, ord('\''))
+                self.screen.addstr(_x, _y, '*')
+
+        for v in self.monsters:
             v.draw(self.offset)
 
     def notify(self, str):
@@ -83,13 +135,162 @@ class Game:
         self.notify( strs[int(random.random() * len(strs))] )
 
     def randomRoom(self):
-        x, y, w, h = int(random.random() * 30), int(random.random() * 30), int(random.random() * 30), int(random.random() * 30)
-        b = 1
-        for v in self.stack:
-            if ( (v.x < x and v.x + v.width < x)
-            or (v.y < y and v.y + v.height < y)
-            or v.x > x + w or v.y > y + h ):
-                b = 0
+        max_width, max_height = self.stdscr.getmaxyx()
 
-        if b:
-            self.stack.append( Room(self.screen, x, y, w, h) )
+        i = -1
+        while i == -1:
+            r = int(random.random() * len(self.stack))
+            if ( self.stack[r].up == -1
+                or self.stack[r].down == -1
+                or self.stack[r].left == -1
+                or self.stack[r].right == -1):
+                i = r
+            pass
+
+        room = self.stack[i]
+
+        _ = -1
+        while _ == -1:
+            _r = int(random.random() * 4)
+            if _r == 0 and room.up == -1:
+                _ = 0
+            if _r == 1 and room.down == -1:
+                _ = 1
+            if _r == 2 and room.left == -1:
+                _ = 2
+            if _r == 3 and room.right == -1:
+                _ = 3
+            pass
+
+        def f(x, y, w, h):
+            nr = Room(self.screen, x, y, w, h)
+            self.stack.append(nr)
+            return nr
+
+        def gen_door(room, size):
+            if size == 0:
+                r = [ room.x, int(random.random() * (room.height - 2)) + room.y + 1 ]
+            if size == 1:
+                r = [ room.width + room.x - 1, int(random.random() * (room.height - 2)) + room.y + 1 ]
+            if size == 2:
+                r = [ int(random.random() * (room.width - 2)) + room.x + 1, room.y ]
+            if size == 3:
+                r = [ int(random.random() * (room.width - 2)) + room.x + 1, room.y + room.height - 1 ]
+
+            room.doors.append(r)
+            return r
+
+        _w, _h = (int(random.random() * self.max_room_size) + self.min_room_size,
+            int(random.random() * self.max_room_size) + self.min_room_size)
+        if _ == 0:
+            nr = f(room.x - _w - self.max_room_size, room.y, _w, _h)
+            r1 = gen_door(room, _)
+            r2 = gen_door(nr, 1)
+            room.up = nr
+            nr.down = room
+
+            __ = range( min(r1[0], r2[0]) + 1, max(r1[0], r2[0]) )
+            mid = __[int(len(__) / 2)]
+            t = r2[1]
+            for i in __:
+                if (r1[1] - r2[1] and i == mid):
+                    if (r1[1] - r2[1] + 1 < 0):
+                        for j in range(r1[1] - r2[1], 0):
+                            self.paths.append([int(i), r1[1] - j])
+                    else:
+                        for j in range(0, r1[1] - r2[1] + 1):
+                            self.paths.append([int(i), r1[1] - j])
+                    t = r1[1]
+
+                self.paths.append([int(i), t])
+
+        elif _ == 1:
+            nr = f(room.x + _w + self.max_room_size, room.y, _w, _h)
+            r2 = gen_door(room, _)
+            r1 = gen_door(nr, 0)
+            room.down = nr
+            nr.up = room
+
+            __ = range( min(r1[0], r2[0]) + 1, max(r1[0], r2[0]) )
+            mid = __[int(len(__) / 2)]
+            t = r2[1]
+            for i in __:
+                if (r1[1] - r2[1] and i == mid):
+                    if (r1[1] - r2[1] < 0):
+                        for j in range(r1[1] - r2[1], 0):
+                            self.paths.append([int(i), r1[1] - j])
+                    else:
+                        for j in range(0, r1[1] - r2[1] + 1):
+                            self.paths.append([int(i), r1[1] - j])
+                    t = r1[1]
+
+                self.paths.append([int(i), t])
+
+
+        elif _ == 2:
+            nr = f(room.x, room.y - _h - self.max_room_size, _w, _h)
+            r1 = gen_door(room, _)
+            r2 = gen_door(nr, 3)
+            room.left = nr
+            nr.right = room
+
+            __ = range( min(r1[1], r2[1]) + 1, max(r1[1], r2[1]) )
+            mid = __[int(len(__) / 2)]
+            t = r2[0]
+            for i in __:
+                if (r1[0] - r2[0] and i == mid):
+                    if (r1[0] - r2[0] < 0):
+                        for j in range(r1[0] - r2[0], 0):
+                            self.paths.append([r1[0] - j, int(i)])
+                    else:
+                        for j in range(0, r1[0] - r2[0] + 1):
+                            self.paths.append([r1[0] - j, int(i)])
+                    t = r1[0]
+
+                self.paths.append([t, int(i)])
+
+
+        elif _ == 3:
+            nr = f(room.x, room.y + self.max_room_size + _h, _w, _h)
+            r2 = gen_door(room, _)
+            r1 = gen_door(nr, 2)
+            room.right = nr
+            nr.left = room
+
+            __ = range( min(r1[1], r2[1]) + 1, max(r1[1], r2[1]) )
+            mid = __[int(len(__) / 2)]
+            t = r2[0]
+            for i in __:
+                if (r1[0] - r2[0] and i == mid):
+                    if (r1[0] - r2[0] < 0):
+                        for j in range(r1[0] - r2[0], 0):
+                            self.paths.append([r1[0] - j, int(i)])
+                    else:
+                        for j in range(0, r1[0] - r2[0] + 1):
+                            self.paths.append([r1[0] - j, int(i)])
+                    t = r1[0]
+
+                self.paths.append([t, int(i)])
+
+        self.gen_gold(nr)
+        self.gen_monster(nr)
+
+    def gen_gold(self, room):
+        nbr = int(random.random() * 3)
+        if (nbr == 0):
+            nbr = int(random.random() * 4)
+            while nbr > -1:
+                x, y = (int(random.random() * (room.width - 2)) + room.x + 1,
+                    int(random.random() * (room.height - 2)) + room.y + 1)
+                self.golds.append([x, y])
+                nbr -= 1
+
+    def gen_monster(self, room):
+        nbr = int(random.random() )
+        if (nbr == 0):
+            nbr = int(random.random() * 6)
+            while nbr > -1:
+                x, y = (int(random.random() * (room.width - 2)) + room.x + 1,
+                    int(random.random() * (room.height - 2)) + room.y + 1)
+                self.monsters.append(Monster(self.screen, self, x, y))
+                nbr -= 1
