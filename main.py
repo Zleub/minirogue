@@ -1,4 +1,4 @@
-import curses, traceback, sys
+import curses, traceback, sys, signal
 from game import Game
 
 # Notes
@@ -13,6 +13,11 @@ from game import Game
 # better room generation(doors, paths)
 # races, classes
 
+def signal_handler(signal, frame):
+        curses.endwin
+        sys.exit(0)
+
+
 def end():
     curses.echo()
     curses.nocbreak()
@@ -26,6 +31,7 @@ if __name__=='__main__':
         sys.exit()
     try:
         sys.path.append('.')
+        signal.signal(signal.SIGINT, signal_handler)
         Game()
     except:
         end()
