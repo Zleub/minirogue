@@ -55,12 +55,41 @@ class Character:
             return 0
         elif (self.oldch == 'ȡ'):
             monsters  = [a for a in self.game.monsters if a.x == self.x + offset[0] and a.y == self.y + offset[1]]
-            self.game.notify('You hit a %s' % (monsters[0].name))
-            monsters[0].life -= (self.str - monsters[0].dfs if self.str - monsters[0].dfs > 0 else 1)
+            _hit = (self.str - monsters[0].dfs if self.str - monsters[0].dfs > 0 else 1)
+            self.game.notify('You hit an ennemy %s for %d damage' % (monsters[0].name, _hit))
+            monsters[0].life -= _hit
             if (monsters[0].life <= 0):
-                _t = monsters[0].level * 5 + random.randrange(0, monsters[0].level * 5)
+                self.game.notify('You killed the ennemy %s' % (monsters[0].name))
+                _t = monsters[0].level * 2 + random.randrange(0, monsters[0].level * 10)
+                _g = random.randrange(0, monsters[0].level * 3)
                 self.exp += _t
-                self.game.notify('You gain %d exp!' % _t)
+                self.gold += _g
+                if _g == 0:
+                    self.game.notify('You gain %d exp!' % (_t))
+                elif _g == 1:
+                    self.game.notify('You gain %d exp! The monster had %d gold coin!' % (_t, _g))
+                else :
+                    self.game.notify('You gain %d exp! The monster had %d gold coins!' % (_t, _g))
+                if self.exp >= self.next_lvl:
+                    self.level += 1
+                    self.exp -= self.next_lvl
+                    self.next_lvl = self.level * 100
+                    self._life += random.randrange(3 + (self.str / 2), 3 + self.str)
+                    self.life = self._life
+                    #self.game.level_up_screen = 1
+                    self.game.notify('Level up ! Choose an upgrade !(type : a -> agi | i -> int | s -> strengh)')
+                    while 1:
+                        c = self.stdscr.getch()
+                        if c == 'a' or c == 's' or c == 'i':
+                            break
+                        else:
+                            self.game.notify('You need to press a or s or i to level up.. Retry again !')
+                    if c == 's':
+                        self.str + 1
+                    if c == 'i':
+                        self.int + 1
+                    if c == 'a':
+                        self.agi + 1
                 self.game.monsters  = [a for a in self.game.monsters if a not in monsters]
 				#choose a bonus.
             return 0

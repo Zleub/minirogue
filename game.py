@@ -90,8 +90,11 @@ class Game:
         if (c == 46):
             self.panel = 1
             return 0
-        if (c == 114 and len([a for a in self.monsters if a.dst < 20]) == 0):
-            self.rest = 1
+        if (c == 114):
+            if (len([a for a in self.monsters if a.dst < 20]) == 0):
+                self.rest = 1
+            else:
+                self.notify('Can\'t rest near monsters !')
             return 0
         if (c == 63):
             self.help = (1 if self.help == 0 else 0)
