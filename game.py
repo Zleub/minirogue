@@ -70,7 +70,7 @@ class Game:
         self.screen_offset = [ int(max_width/ 2), int(max_height/ 2) ]
 
     def game_control(self, c):
-        err(c)
+        # err(c)
         if (c == curses.KEY_UP
           and self.character.collides([-1, 0]) ):
             self.offset[0] += 1

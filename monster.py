@@ -92,10 +92,9 @@ class Monster:
         if (_x >= 0 and _y >= 0
           and _x < max_width - 8 and _y < max_height):
             self.oldch = chr(self.screen.inch(_x, _y))
-            err([self.id, str(self.oldch), ascii(self.oldch)])
             test = self.oldch.encode()
             for value in test:
-                err(value)
+                # err(value)
                 pass
             if (self.oldch == '祐' or self.oldch == ' ' or self.oldch == 'ȡ'):
                 return 0

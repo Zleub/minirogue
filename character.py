@@ -44,12 +44,12 @@ class Character:
 
     def collides(self, offset):
         self.oldch = chr(self.screen.inch(self._x + offset[0], self._y + offset[1]))
-        err('Character')
-        err(self.oldch)
-        test = self.oldch.encode()
-        for value in test:
-            err(value)
-            pass
+        # err('Character')
+        # err(self.oldch)
+        # test = self.oldch.encode()
+        # for value in test:
+            # err(value)
+            # pass
         if (self.oldch == '祐' or self.oldch == ' '):
             self.game.notify('You knock yourself back')
             return 0
