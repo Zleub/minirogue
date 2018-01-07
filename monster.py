@@ -93,7 +93,14 @@ class Monster:
         if (_x >= 0 and _y >= 0
           and _x < max_width - 8 and _y < max_height):
             self.oldch = chr(self.screen.inch(_x, _y))
-            if (self.oldch == '祐' or self.oldch == ' ' or self.oldch == 'ȡ'):
+            if (self.oldch == '㕔'):
+                if (random.randrange(0, 20)== 0):
+                    self._life -= random.randrange(1, 5)
+                    if self.life > self._life :
+                        self.life = self._life
+                else:
+                    self.life -= random.randrange(5, 20)
+            elif (self.oldch == '祐' or self.oldch == ' ' or self.oldch == 'ȡ'):
                 return 0
             elif (self.oldch == 'ീ'):
                 _d = (self.atk - self.game.character.agi if self.atk - self.game.character.agi > 0 else 1)

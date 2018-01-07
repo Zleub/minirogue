@@ -115,6 +115,7 @@ class Game:
             self.paths = []
             self.stairs = []
             self.monsters = []
+
             self.stack = [
                 Room(self.screen, -7, -5, 10, 20),
             ]
@@ -125,6 +126,17 @@ class Game:
 
             self.get_screen_offset()
             self.offset = [0, 0]
+
+            self.panel = 0
+            self.rest = 0
+            self.help = 0
+            self.death = 0
+            self.menu = 0
+            self.game = 1
+
+            self.character.x = 0
+            self.character.y = 0
+            self.character.recup = 0
 
             return 0
         if (c == 27):
@@ -174,6 +186,7 @@ class Game:
                 self.draw()
                 if (t):
                     self.turns += 1
+                    err(self.turns)
                     for v in self.monsters:
                         v.update([self.offset[0] + self.screen_offset[0], self.offset[1] + self.screen_offset[1]])
                     if int(random.random() * 100) == 0:
@@ -479,7 +492,7 @@ class Game:
     def gen_monster(self, room):
         nbr = int(random.random() )
         if (nbr == 0):
-            nbr = int(random.random() * 6)
+            nbr = int(random.random() * 2)
             while nbr > -1:
                 x, y = (int(random.random() * (room.width - 2)) + room.x + 1,
                     int(random.random() * (room.height - 2)) + room.y + 1)
