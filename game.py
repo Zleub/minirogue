@@ -59,7 +59,7 @@ class Game:
             Room(self.screen, -7, -5, 10, 20),
         ]
 
-        while len(self.stack) != 10:
+        while len(self.stack) != 3:
             self.randomRoom()
             pass
 
