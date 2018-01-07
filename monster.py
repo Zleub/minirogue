@@ -7,9 +7,14 @@ names = [
     'Troll'
 ]
 
+
 class Monster:
+    id = 0
+
     def __init__(self, screen, game, x, y):
-        # print('Character init')
+        self.id = Monster.id
+        Monster.id += 1
+
         self.screen = screen
         self.game = game
         self.x, self.y = x, y
@@ -17,14 +22,18 @@ class Monster:
         self.life = self._life
         self.name = names[int(random.random() * len(names))]
 
+        self.atk = int(random.random() * 4) + 1
+        self.dfs = int(random.random() * 3) + 1
+
     def update(self, offset):
-        dst = math.sqrt(
+        self.dst = math.sqrt(
             math.pow(self.game.character.y - self.y, 2) +
             math.pow(self.game.character.x - self.x, 2)
         )
         x, y = self.game.character.x - self.x, self.game.character.y - self.y
         move = [0, 0]
-        if (dst < 20):
+        if (self.dst < 20):
+            # err([self.id, x, y])
             if (abs(self.game.character.y - self.y) >= abs(self.game.character.x - self.x)
               and self.game.character.y - self.y < 0):
                 if (self.collides([0 + offset[0], -1 + offset[1]])):
@@ -72,16 +81,21 @@ class Monster:
         _y = self.y + offset[1]
         if (_x >= 0 and _y >= 0
             and _x < max_width - 8 and _y < max_height):
-                self.screen.addstr(_x, _y, '!')
+                self.screen.addstr(_x, _y, '!', curses.color_pair(MONSTER_COLOR))
 
     def collides(self, offset):
-        err(self.x)
-        err(offset)
-        self.oldch = chr(self.screen.inch(self.x + offset[0], self.y + offset[1]))
-        err(self.oldch)
-        if (self.oldch == 'O' or self.oldch == ' ' or self.oldch == '!'):
-            return 0
-        elif (self.oldch == '@'):
-            self.game.notify('A %s hit you' % self.name)
-            return 0
-        return 1
+        max_width, max_height = self.screen.getmaxyx()
+        _x = self.x + offset[0]
+        _y = self.y + offset[1]
+        if (_x >= 0 and _y >= 0
+          and _x < max_width - 8 and _y < max_height):
+            self.oldch = chr(self.screen.inch(_x, _y))
+            if (self.oldch == 'ཏ' or self.oldch == ' ' or self.oldch == 'ȡ'):
+                return 0
+            elif (self.oldch == 'ീ'):
+                self.game.notify('A %s hit you' % self.name)
+                self.game.character.life -= (self.atk - self.game.character.agi if self.atk - self.game.character.agi > 0 else 1)
+
+                return 0
+            return 1
+        return 0

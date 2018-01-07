@@ -30,12 +30,12 @@ class Room:
                 if (__x >= 0 and __y >= 0
                 and __x < max_width - 8 and __y < max_height):
                     if len([x for x in self.doors if x[0] == _x and x[1] == _y]) != 0:
-                        self.screen.addstr(__x, __y, '/')
+                        self.screen.addstr(__x, __y, '/', curses.color_pair(DOOR_COLOR))
                     elif (_x == self.x
                       or _y == self.y
                       or _x == self.x + self.width - 1
                       or _y == self.y + self.height - 1):
-                        self.screen.addstr(__x, __y, 'O')
+                        self.screen.addstr(__x, __y, 'O', curses.color_pair(WALL_COLOR))
                     else:
-                        self.screen.addstr(__x, __y, '.')
+                        self.screen.addstr(__x, __y, '.', curses.color_pair(FLOOR_COLOR))
         self.screen.refresh()

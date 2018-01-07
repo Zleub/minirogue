@@ -50,24 +50,12 @@ class Game:
         while 1:
             max_width, max_height = self.stdscr.getmaxyx()
 
-            self.screen.clear()
             self.draw()
-            self.character.draw()
-            self.screen.hline(max_width - 8, 0, curses.ACS_HLINE, max_height)
-            i = 7
-            for v in self.logger:
-                self.screen.addstr(max_width - i, 0, v)
-                i -= 1
-
-            self.screen.addstr(0, 0, self.character.toString())
-
-
-            self.screen.refresh()
-
-            err('----')
 
             for v in self.monsters:
                 v.update(self.offset)
+
+            self.draw()
 
             c = self.stdscr.getch()
             if (c == curses.KEY_UP
@@ -93,11 +81,11 @@ class Game:
             if int(random.random() * 100) == 0:
                 self.randomNotify()
 
-
             pass
 
     def draw(self):
         max_width, max_height = self.stdscr.getmaxyx()
+        self.screen.clear()
 
         for v in self.stack:
             v.draw(self.offset)
@@ -108,7 +96,7 @@ class Game:
             if (_x >= 0 and _y >= 0
                 and _x < max_width - 8 and _y < max_height):
                 # self.screen.addch(_x, _y, ord('\''))
-                self.screen.addstr(_x, _y, '.')
+                self.screen.addstr(_x, _y, '.', curses.color_pair(FLOOR_COLOR))
 
         for v in self.golds:
             _x = v[0] + self.offset[0]
@@ -116,10 +104,21 @@ class Game:
             if (_x >= 0 and _y >= 0
                 and _x < max_width - 8 and _y < max_height):
                 # self.screen.addch(_x, _y, ord('\''))
-                self.screen.addstr(_x, _y, '*')
+                self.screen.addstr(_x, _y, '*', curses.color_pair(GOLD_COLOR))
 
         for v in self.monsters:
             v.draw(self.offset)
+
+        self.character.draw()
+        self.screen.hline(max_width - 8, 0, curses.ACS_HLINE, max_height)
+        i = 7
+        for v in self.logger:
+            self.screen.addstr(max_width - i, 0, v)
+            i -= 1
+
+        self.screen.addstr(0, 0, self.character.toString())
+        self.screen.refresh()
+
 
     def notify(self, str):
         self.logger.append(str)
@@ -216,7 +215,7 @@ class Game:
             t = r2[1]
             for i in __:
                 if (r1[1] - r2[1] and i == mid):
-                    if (r1[1] - r2[1] < 0):
+                    if (r1[1] - r2[1] + 1 < 0):
                         for j in range(r1[1] - r2[1], 0):
                             self.paths.append([int(i), r1[1] - j])
                     else:
