@@ -99,10 +99,12 @@ class Monster:
             if (self.oldch == '祐' or self.oldch == ' ' or self.oldch == 'ȡ'):
                 return 0
             elif (self.oldch == 'ീ'):
-                self.game.notify('A %s hit you' % self.name)
-                self.game.character.life -= (self.atk - self.game.character.agi if self.atk - self.game.character.agi > 0 else 1)
+                _d = (self.atk - self.game.character.agi if self.atk - self.game.character.agi > 0 else 1)
+                self.game.notify('An ennemy %s hit you for %d' % (self.name, _d))
+                self.game.character.life -= _d
                 if self.game.character.life <= 0:
-                    self.game.notify('Game over !')
+                    self.game.notify('Game over ! Press any key to continue ...')
+                    c = self.game.stdscr.getch()
                     self.game.menu = 1
                 return 0
             return 1

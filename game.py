@@ -46,6 +46,7 @@ class Game:
         self.level = 1
 
         self.golds = []
+        self.food = [] ## TODO Add classes (i.e. which character ? Also fix room gen Add trap)
         self.paths = []
         self.stairs = []
         self.monsters = []
@@ -53,7 +54,7 @@ class Game:
             Room(self.screen, -7, -5, 10, 20),
         ]
 
-        while len(self.stack) != 10:
+        while len(self.stack) != 3:
             self.randomRoom()
             pass
 
@@ -71,7 +72,7 @@ class Game:
         self.screen_offset = [ int(max_width/ 2), int(max_height/ 2) ]
 
     def game_control(self, c):
-        # err(c)
+        err(c)
         if (c == curses.KEY_UP
           and self.character.collides([-1, 0]) ):
             self.offset[0] += 1
@@ -88,14 +89,33 @@ class Game:
           and self.character.collides([0, 1]) ):
             self.offset[1] -= 1
             self.character.y += 1
-        if (c == 46):
-            self.panel = 1
+        # if (c == 46):
+        #     self.panel = 1
             return 0
-        if (c == 114 and len([a for a in self.monsters if a.dst < 20]) == 0):
-            self.rest = 1
+        if (c == 114):
+            if (len([a for a in self.monsters if a.dst < 20]) == 0):
+                self.rest = 1
+            else:
+                self.notify('Can\'t rest near monsters !')
             return 0
         if (c == 63):
             self.help = (1 if self.help == 0 else 0)
+            return 0
+        if (c == 62 and self.character.oldch == '>'):
+            self.paths = []
+            self.stairs = []
+            self.monsters = []
+            self.stack = [
+                Room(self.screen, -7, -5, 10, 20),
+            ]
+
+            while len(self.stack) != 3:
+                self.randomRoom()
+                pass
+
+            self.get_screen_offset()
+            self.offset = [0, 0]
+
             return 0
         if (c == 27):
             end()
@@ -132,24 +152,19 @@ class Game:
                     self.notify('You feel refreshed (%d turns passed)' % self.rest)
                     self.rest = 0
             elif (self.game):
-                self.turns += 1
                 self.draw()
                 c = self.stdscr.getch()
                 t = self.game_control(c)
                 self.character.update()
                 self.draw()
                 if (t):
+                    self.turns += 1
                     for v in self.monsters:
                         v.update([self.offset[0] + self.screen_offset[0], self.offset[1] + self.screen_offset[1]])
                     if int(random.random() * 100) == 0:
                         self.randomNotify()
-                if (len(self.monsters) == 0):
+                if (len(self.monsters) == 0 and len(self.stairs) == 0):
                     self.stairs.append([self.character.x, self.character.y])
-
-            if (self.help):
-                self.screen.addstr(2, 0, '[UP/DOWN/LEFT/RIGHT] : move around')
-                self.screen.addstr(3, 0, '[?] : show this panel')
-                self.screen.refresh()
             pass
 
     def draw_menu(self):
@@ -197,12 +212,20 @@ class Game:
                 and _x < max_width - 8 and _y < max_height):
                 self.screen.addstr(_x, _y, '*', curses.color_pair(GOLD_COLOR))
 
+        for v in self.food:
+            _x = v[0] + offset[0]
+            _y = v[1] + offset[1]
+            if (_x >= 0 and _y >= 0
+                and _x < max_width - 8 and _y < max_height):
+                self.screen.addstr(_x, _y, 'F', curses.color_pair(FOOD_COLOR))
+
         for v in self.stairs:
             _x = v[0] + offset[0]
             _y = v[1] + offset[1]
             if (_x >= 0 and _y >= 0
                 and _x < max_width - 8 and _y < max_height):
-                self.screen.addstr(_x, _y, '>', curses.color_pair(GOLD_COLOR))
+                self.screen.addstr(_x, _y, '>', curses.color_pair(STAIRS_COLOR))
+
 
         for v in self.monsters:
             v.draw(offset)
@@ -215,6 +238,14 @@ class Game:
             i -= 1
 
         self.screen.addstr(0, 0, '[%d] %s' % (self.turns, self.character.toString()))
+
+        if (self.help):
+            self.screen.addstr(2, 0, '[UP/DOWN/LEFT/RIGHT] : move around')
+            self.screen.addstr(3, 0, '[?] : show this panel')
+            self.screen.addstr(4, 0, '[r] : rest')
+            self.screen.addstr(5, 0, '[>] : take stairs')
+            self.screen.addstr(5, 0, '[ESC] : close game')
+
         self.screen.refresh()
 
 
@@ -370,6 +401,7 @@ class Game:
                 self.paths.append([t, int(i)])
 
         self.gen_gold(nr)
+        self.gen_food(nr)
         self.gen_monster(nr)
 
     def gen_gold(self, room):
@@ -380,6 +412,16 @@ class Game:
                 x, y = (int(random.random() * (room.width - 2)) + room.x + 1,
                     int(random.random() * (room.height - 2)) + room.y + 1)
                 self.golds.append([x, y])
+                nbr -= 1
+
+    def gen_food(self, room):
+        nbr = int(random.random() * 3)
+        if (nbr == 0):
+            nbr = int(random.random() * 2)
+            while nbr > -1:
+                x, y = (int(random.random() * (room.width - 2)) + room.x + 1,
+                    int(random.random() * (room.height - 2)) + room.y + 1)
+                self.food.append([x, y])
                 nbr -= 1
 
     def gen_monster(self, room):
