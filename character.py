@@ -106,9 +106,21 @@ class Character:
                 self.game.notify('You found some food on the floor! But you\'re already full, come back later !')
             else :
                 self.game.notify('You found some food on the floor! You eat it and restore your life !')
-                self.addLife(random.randrange(2, self.game.level * 3))
+                self.addLife(random.randrange(1, int(self._life / 20 + self.game.level * 3)))
                 self.game.food = [a for a in self.game.food if a not in [[self.x + offset[0], self.y + offset[1]]]]
                 self.oldch = 'Į'
+        elif (self.oldch == '㕔'):
+            self.game.notify('You stepped on a trap.. Are you blind ?')
+            if (random.randrange(0, 20)== 0):
+                self._life -= random.randrange(1, 5)
+                if self.life > self._life :
+                    self.life = self._life
+            else:
+                self.life -= random.randrange(5, 20)
+            if self.life <= 0:
+                self.game.notify('Game over !')
+                self.game.menu = 1
+            self.life
         elif (self.oldch == '휪'):
             g = int(random.random() * 10) + 2
             self.gold += g
@@ -118,6 +130,6 @@ class Character:
         return 1
 
     def toString(self):
-        return 'Level: %d \tLife: %d / %d\tGold: %d\t\tSTR: %d\tAGI: %d\tINT: %d \tEXP: %d%c' % (
-            self.level, self.life, self._life, self.gold, self.str, self.agi, self.int, self.exp / self.next_lvl * 100, '%'
+        return 'Floor: %d\t\tLevel: %d \tLife: %d / %d\tGold: %d\t\tSTR: %d\tAGI: %d\tINT: %d \tEXP: %d%c' % (
+            self.game.level, self.level, self.life, self._life, self.gold, self.str, self.agi, self.int, self.exp / self.next_lvl * 100, '%'
         )
