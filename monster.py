@@ -98,12 +98,7 @@ class Monster:
             elif (self.oldch == 'ീ'):
                 _d = (self.atk - self.game.character.agi if self.atk - self.game.character.agi > 0 else 1)
                 self.game.notify('An ennemy %s hit you for %d' % (self.name, _d))
-                # self.game.death = 1
                 self.game.character.life -= _d
-                # if self.game.character.life <= 0:
-                #     self.game.notify('Game over ! Press any key to continue ...')
-                #     c = self.game.stdscr.getch()
-                #     self.game.menu = 1
                 return 0
             return 1
         return 0

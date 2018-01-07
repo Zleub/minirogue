@@ -96,11 +96,6 @@ class Character:
                     self.next_lvl = self.level * 100
                     self._life += random.randrange(3 + (self.str / 2), 3 + self.str)
                     self.life = self._life
-                    # #self.game.level_up_screen = 1
-                    # self.game.notify('Level up !')
-                    # self.str += self.lvl_up_str
-                    # self.int += self.lvl_up_int
-                    # self.agi += self.lvl_up_agi
                     self.game.notify('Level up ! Choose an upgrade !(type : a -> agi | i -> int | s -> strengh)')
                     while 1:
                         c = chr(self.game.stdscr.getch())
@@ -137,11 +132,6 @@ class Character:
                     self.life = self._life
             else:
                 self.life -= random.randrange(5, 20)
-            # if self.life <= 0:
-            #     self.game.notify('Game over !')
-            #     c = self.game.stdscr.getch()
-            #     self.game.menu = 1
-            # self.life
         elif (self.oldch == '휪'):
             g = int(random.random() * 10) + 2
             self.gold += g
