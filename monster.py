@@ -74,18 +74,7 @@ class Monster:
 
             self.x += move[0]
             self.y += move[1]
-
-        else:
-            r = int(random.random() * 2)
-            m = int(random.random() * 2)
-            if (m == 0):
-                m = -1
-            if (r and self.collides([m + offset[0], 0 + offset[1]])):
-                self.x += m
-            elif (self.collides([0 + offset[0], m + offset[1]])):
-                self.y += m
-
-        self.game.draw()
+            self.game.draw()
 
     def draw(self, offset):
         max_width, max_height = self.screen.getmaxyx()
@@ -103,9 +92,12 @@ class Monster:
         if (_x >= 0 and _y >= 0
           and _x < max_width - 8 and _y < max_height):
             self.oldch = chr(self.screen.inch(_x, _y))
-            err([self.id, self.oldch, ascii(self.oldch)])
-            err(unicodedata.decomposition(self.oldch))
-            if (self.oldch == 'ཏ' or self.oldch == ' ' or self.oldch == 'ȡ'):
+            err([self.id, str(self.oldch), ascii(self.oldch)])
+            test = self.oldch.encode()
+            for value in test:
+                err(value)
+                pass
+            if (self.oldch == '祐' or self.oldch == ' ' or self.oldch == 'ȡ'):
                 return 0
             elif (self.oldch == 'ീ'):
                 self.game.notify('A %s hit you' % self.name)
