@@ -47,6 +47,7 @@ class Game:
 
         self.golds = []
         self.food = [] ## TODO Add classes (i.e. which character ? Also fix room gen Add trap)
+        self.trap = []
         self.paths = []
         self.monsters = []
         self.stack = [
@@ -207,6 +208,14 @@ class Game:
                 and _x < max_width - 8 and _y < max_height):
                 # self.screen.addch(_x, _y, ord('\''))
                 self.screen.addstr(_x, _y, 'F', curses.color_pair(FOOD_COLOR))
+
+        for v in self.trap:
+            _x = v[0] + offset[0]
+            _y = v[1] + offset[1]
+            if (_x >= 0 and _y >= 0
+                and _x < max_width - 8 and _y < max_height):
+                # self.screen.addch(_x, _y, ord('\''))
+                self.screen.addstr(_x, _y, 'T', curses.color_pair(TRAP_COLOR))
 
         for v in self.monsters:
             v.draw(offset)
@@ -376,6 +385,7 @@ class Game:
         self.gen_gold(nr)
         self.gen_food(nr)
         self.gen_monster(nr)
+        self.gen_trap(nr)
 
     def gen_gold(self, room):
         nbr = int(random.random() * 3)
@@ -395,6 +405,16 @@ class Game:
                 x, y = (int(random.random() * (room.width - 2)) + room.x + 1,
                     int(random.random() * (room.height - 2)) + room.y + 1)
                 self.food.append([x, y])
+                nbr -= 1
+
+    def gen_trap(self, room):
+        nbr = int(random.random() * 3)
+        if (nbr == 0):
+            nbr = int(random.random() * 8 + 4)
+            while nbr > -1:
+                x, y = (int(random.random() * (room.width - 2)) + room.x + 1,
+                    int(random.random() * (room.height - 2)) + room.y + 1)
+                self.trap.append([x, y])
                 nbr -= 1
 
     def gen_monster(self, room):
