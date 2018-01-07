@@ -14,8 +14,8 @@ from game import Game
 # races, classes
 
 def signal_handler(signal, frame):
-        curses.endwin
-        sys.exit(0)
+    curses.endwin()
+    sys.exit(0)
 
 
 def end():

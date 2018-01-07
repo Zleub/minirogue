@@ -31,11 +31,15 @@ class Character:
         else:
             self.life += v
 
-    def draw(self):
+    def update(self):
         self.recup += 1
         if (self.recup == 100):
             self.recup = 0
             self.addLife(1)
+
+    def draw(self):
+        self._x, self._y = self.screen.getmaxyx()
+        self._x, self._y = (int(self._x / 2), int(self._y / 2))
         self.screen.addstr(self._x, self._y, '@', curses.color_pair(PLAYER_COLOR))
 
     def collides(self, offset):

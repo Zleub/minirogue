@@ -1,4 +1,4 @@
-import curses, math, random
+import curses, math, random, unicodedata
 from colors import *
 
 names = [
@@ -75,8 +75,17 @@ class Monster:
             self.x += move[0]
             self.y += move[1]
 
-            self.game.draw()
+        else:
+            r = int(random.random() * 2)
+            m = int(random.random() * 2)
+            if (m == 0):
+                m = -1
+            if (r and self.collides([m + offset[0], 0 + offset[1]])):
+                self.x += m
+            elif (self.collides([0 + offset[0], m + offset[1]])):
+                self.y += m
 
+        self.game.draw()
 
     def draw(self, offset):
         max_width, max_height = self.screen.getmaxyx()
@@ -94,6 +103,8 @@ class Monster:
         if (_x >= 0 and _y >= 0
           and _x < max_width - 8 and _y < max_height):
             self.oldch = chr(self.screen.inch(_x, _y))
+            err([self.id, self.oldch, ascii(self.oldch)])
+            err(unicodedata.decomposition(self.oldch))
             if (self.oldch == 'ཏ' or self.oldch == ' ' or self.oldch == 'ȡ'):
                 return 0
             elif (self.oldch == 'ീ'):
@@ -101,7 +112,7 @@ class Monster:
                 self.game.character.life -= (self.atk - self.game.character.agi if self.atk - self.game.character.agi > 0 else 1)
                 if self.game.character.life <= 0:
                     self.game.notify('Game over !')
-                    game.menu = 1
+                    self.game.menu = 1
                 return 0
             return 1
         return 0
