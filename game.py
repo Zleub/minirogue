@@ -47,6 +47,7 @@ class Game:
 
         self.golds = []
         self.paths = []
+        self.stairs = []
         self.monsters = []
         self.stack = [
             Room(self.screen, -7, -5, 10, 20),
@@ -142,6 +143,8 @@ class Game:
                         v.update([self.offset[0] + self.screen_offset[0], self.offset[1] + self.screen_offset[1]])
                     if int(random.random() * 100) == 0:
                         self.randomNotify()
+                if (len(self.monsters) == 0):
+                    self.stairs.append([self.character.x, self.character.y])
 
             if (self.help):
                 self.screen.addstr(2, 0, '[UP/DOWN/LEFT/RIGHT] : move around')
@@ -185,7 +188,6 @@ class Game:
             _y = v[1] + offset[1]
             if (_x >= 0 and _y >= 0
                 and _x < max_width - 8 and _y < max_height):
-                # self.screen.addch(_x, _y, ord('\''))
                 self.screen.addstr(_x, _y, '.', curses.color_pair(FLOOR_COLOR))
 
         for v in self.golds:
@@ -193,8 +195,14 @@ class Game:
             _y = v[1] + offset[1]
             if (_x >= 0 and _y >= 0
                 and _x < max_width - 8 and _y < max_height):
-                # self.screen.addch(_x, _y, ord('\''))
                 self.screen.addstr(_x, _y, '*', curses.color_pair(GOLD_COLOR))
+
+        for v in self.stairs:
+            _x = v[0] + offset[0]
+            _y = v[1] + offset[1]
+            if (_x >= 0 and _y >= 0
+                and _x < max_width - 8 and _y < max_height):
+                self.screen.addstr(_x, _y, '>', curses.color_pair(GOLD_COLOR))
 
         for v in self.monsters:
             v.draw(offset)
