@@ -13,6 +13,7 @@ class Character:
 
         self._life = 10
         self.life = 10
+        self.recup = 0
 
         self.gold = 0
 
@@ -20,7 +21,17 @@ class Character:
         self.agi = 4
         self.int = 4
 
+    def addLife(self, v):
+        if (self.life + v >= self._life):
+            self.life = self._life
+        else:
+            self.life += v
+
     def draw(self):
+        self.recup += 1
+        if (self.recup == 100):
+            self.recup = 0
+            self.addLife(1)
         self.screen.addstr(self._x, self._y, '@', curses.color_pair(PLAYER_COLOR))
 
     def collides(self, offset):

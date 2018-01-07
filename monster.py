@@ -73,6 +73,8 @@ class Monster:
             self.x += move[0]
             self.y += move[1]
 
+            self.game.draw()
+
 
     def draw(self, offset):
         max_width, max_height = self.screen.getmaxyx()

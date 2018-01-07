@@ -38,7 +38,10 @@ class Game:
             self.randomRoom()
             pass
 
+        self.selected = 0
+        self.max_selected = 3
         self.panel = 0
+        self.menu = 1
         self.offset = [ int(max_width/ 2), int(max_height/ 2) ]
         self.logger = [
             'Hello World'
@@ -46,42 +49,82 @@ class Game:
 
         self.loop()
 
+    def game_control(self, c):
+        if (c == curses.KEY_UP
+          and self.character.collides([-1, 0]) ):
+            self.offset[0] += 1
+            self.character.x -= 1
+        if (c == curses.KEY_DOWN
+          and self.character.collides([1, 0]) ):
+            self.offset[0] -= 1
+            self.character.x += 1
+        if (c == curses.KEY_LEFT
+          and self.character.collides([0, -1]) ):
+            self.offset[1] += 1
+            self.character.y -= 1
+        if (c == curses.KEY_RIGHT
+          and self.character.collides([0, 1]) ):
+            self.offset[1] -= 1
+            self.character.y += 1
+        if (c == 46):
+            self.panel = 1
+            return 0
+        return 1
+
+    def menu_control(self, c):
+        if (c == curses.KEY_UP):
+            self.selected = (self.selected - 1 if self.selected - 1 >= 0 else self.max_selected )
+        if (c == curses.KEY_DOWN):
+            self.selected = (self.selected + 1 if self.selected + 1 <= self.max_selected else 0 )
+        if (c == 10 and self.selected == 0):
+            self.menu = 0
+            self.game = 1
+        if (c == 10 and self.selected == 3):
+            end()
+
     def loop(self):
+
         while 1:
             max_width, max_height = self.stdscr.getmaxyx()
 
-            self.draw()
-
-            for v in self.monsters:
-                v.update(self.offset)
-
-            self.draw()
-
-            c = self.stdscr.getch()
-            if (c == curses.KEY_UP
-              and self.character.collides([-1, 0]) ):
-                self.offset[0] += 1
-                self.character.x -= 1
-            if (c == curses.KEY_DOWN
-              and self.character.collides([1, 0]) ):
-                self.offset[0] -= 1
-                self.character.x += 1
-            if (c == curses.KEY_LEFT
-              and self.character.collides([0, -1]) ):
-                self.offset[1] += 1
-                self.character.y -= 1
-            if (c == curses.KEY_RIGHT
-              and self.character.collides([0, 1]) ):
-                self.offset[1] -= 1
-                self.character.y += 1
-
-            if (c == 46):
-                self.panel = 1
-
-            if int(random.random() * 100) == 0:
-                self.randomNotify()
-
+            if (self.menu):
+                self.draw_menu()
+                c = self.stdscr.getch()
+                self.menu_control(c)
+            elif (self.game):
+                self.draw()
+                c = self.stdscr.getch()
+                t = self.game_control(c)
+                self.draw()
+                if (t):
+                    for v in self.monsters:
+                        v.update(self.offset)
+                    if int(random.random() * 100) == 0:
+                        self.randomNotify()
             pass
+
+    def draw_menu(self):
+        max_width, max_height = self.screen.getmaxyx()
+
+        self.screen.clear()
+        self.screen.addstr(0, int(max_height / 2) - 23, '  __  __ _       _                            ')
+        self.screen.addstr(1, int(max_height / 2) - 23, ' |  \/  (_)     (_)                           ')
+        self.screen.addstr(2, int(max_height / 2) - 23, ' | \  / |_ _ __  _ _ __ ___   __ _ _   _  ___ ')
+        self.screen.addstr(3, int(max_height / 2) - 23, ' | |\/| | | \'_ \| | \'__/ _ \ / _` | | | |/ _ \\')
+        self.screen.addstr(4, int(max_height / 2) - 23, ' | |  | | | | | | | | | (_) | (_| | |_| |  __/')
+        self.screen.addstr(5, int(max_height / 2) - 23, ' |_|  |_|_|_| |_|_|_|  \___/ \__, |\__,_|\___|')
+        self.screen.addstr(6, int(max_height / 2) - 23, '                              __/ |           ')
+        self.screen.addstr(7, int(max_height / 2) - 23, '                             |___/            ')
+
+        self.screen.addstr(12, int(max_height / 2) - 4, 'New Game')
+        self.screen.addstr(13, int(max_height / 2) - 4, 'Load Game')
+        self.screen.addstr(14, int(max_height / 2) - 4, 'Options')
+        self.screen.addstr(15, int(max_height / 2) - 4, 'Exit')
+
+        self.screen.addstr( 12 + self.selected, int(max_height / 2) - 6, '>')
+
+        self.screen.refresh()
+
 
     def draw(self):
         max_width, max_height = self.stdscr.getmaxyx()

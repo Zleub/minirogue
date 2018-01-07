@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "main.py", line 35, in <module>
+    Game()
+  File "/Users/adebray/minirogue/game.py", line 50, in __init__
+    self.loop()
+  File "/Users/adebray/minirogue/game.py", line 96, in loop
+    c = self.stdscr.getch()
+  File "main.py", line 18, in signal_handler
+    sys.exit(0)
+SystemExit: 0
