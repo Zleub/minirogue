@@ -4,11 +4,12 @@ from monster import Monster
 from room import Room
 from colors import *
 
-def end():
+def end(msg):
     curses.echo()
     curses.nocbreak()
     curses.endwin()
     curses.curs_set(1)
+    print(msg)
     sys.exit(0)
 
 class Game:
@@ -36,6 +37,8 @@ class Game:
         self.selected = 0
         self.max_selected = 3
         self.help = 0
+        self.offset = [0, 0]
+        self.death = 0
 
         self.loop()
 
@@ -55,13 +58,15 @@ class Game:
             Room(self.screen, -7, -5, 10, 20),
         ]
 
-        while len(self.stack) != 3:
+        while len(self.stack) != 10:
             self.randomRoom()
             pass
 
         self.panel = 0
         self.turns = 0
         self.rest = 0
+        self.help = 0
+        self.death = 0
         self.get_screen_offset()
         self.offset = [0, 0]
         self.logger = [
@@ -92,7 +97,7 @@ class Game:
             self.character.y += 1
         # if (c == 46):
         #     self.panel = 1
-            return 0
+            # return 0
         if (c == 114):
             if (len([a for a in self.monsters if a.dst < 20]) == 0):
                 self.rest = 1
@@ -102,7 +107,11 @@ class Game:
         if (c == 63):
             self.help = (1 if self.help == 0 else 0)
             return 0
-        if (c == 62 and self.character.oldch == '>'):
+        if (c == 62 and self.character.oldch == '慨'):
+            self.level += 1
+            self.golds = []
+            self.food = [] ## TODO Add classes (i.e. which character ? Also fix room gen Add trap)
+            self.trap = []
             self.paths = []
             self.stairs = []
             self.monsters = []
@@ -119,7 +128,7 @@ class Game:
 
             return 0
         if (c == 27):
-            end()
+            end('')
             return 0
         return 1
 
@@ -141,8 +150,10 @@ class Game:
             self.get_screen_offset()
             max_width, max_height = self.stdscr.getmaxyx()
 
+            if (max_height < 80 or max_width < 20):
+                end("Window too small, resize plz")
+            self.draw()
             if (self.menu):
-                self.draw_menu()
                 c = self.stdscr.getch()
                 self.menu_control(c)
             elif (self.game and self.rest):
@@ -166,12 +177,18 @@ class Game:
                         self.randomNotify()
                 if (len(self.monsters) == 0 and len(self.stairs) == 0):
                     self.stairs.append([self.character.x, self.character.y])
+
+            if (self.death):
+                self.stdscr.getch()
+                self.death = 0
+                self.menu = 1
             pass
 
     def draw_menu(self):
         max_width, max_height = self.screen.getmaxyx()
 
         self.screen.clear()
+
         self.screen.addstr(0, int(max_height / 2) - 23, '  __  __ _       _                            ')
         self.screen.addstr(1, int(max_height / 2) - 23, ' |  \/  (_)     (_)                           ')
         self.screen.addstr(2, int(max_height / 2) - 23, ' | \  / |_ _ __  _ _ __ ___   __ _ _   _  ___ ')
@@ -194,6 +211,26 @@ class Game:
     def draw(self):
         max_width, max_height = self.stdscr.getmaxyx()
         self.screen.clear()
+
+        if (self.help):
+            self.screen.addstr(2, 0, '[UP/DOWN/LEFT/RIGHT] : move around')
+            self.screen.addstr(3, 0, '[?] : show this panel')
+            self.screen.addstr(4, 0, '[r] : rest')
+            self.screen.addstr(5, 0, '[>] : take stairs')
+            self.screen.addstr(6, 0, '[ESC] : close game')
+            self.screen.refresh()
+            return
+
+        if (self.death):
+            self.screen.addstr(2, 0, 'You died ...')
+            self.screen.addstr(4, 0, 'You were lvl %d at dungeon %d' % (self.character.level, self.level))
+            self.screen.refresh()
+            return
+
+        if (self.menu):
+            self.draw_menu()
+            self.screen.refresh()
+            return
 
         offset = [self.offset[0] + self.screen_offset[0], self.offset[1] + self.screen_offset[1]]
         for v in self.stack:
@@ -232,7 +269,7 @@ class Game:
             _y = v[1] + offset[1]
             if (_x >= 0 and _y >= 0
                 and _x < max_width - 8 and _y < max_height):
-                self.screen.addstr(_x, _y, '>', curses.color_pair(TRAP_COLOR))
+                self.screen.addstr(_x, _y, 'T', curses.color_pair(TRAP_COLOR))
 
 
         for v in self.monsters:
@@ -246,13 +283,6 @@ class Game:
             i -= 1
 
         self.screen.addstr(0, 0, '[%d] %s' % (self.turns, self.character.toString()))
-
-        if (self.help):
-            self.screen.addstr(2, 0, '[UP/DOWN/LEFT/RIGHT] : move around')
-            self.screen.addstr(3, 0, '[?] : show this panel')
-            self.screen.addstr(4, 0, '[r] : rest')
-            self.screen.addstr(5, 0, '[>] : take stairs')
-            self.screen.addstr(5, 0, '[ESC] : close game')
 
         self.screen.refresh()
 

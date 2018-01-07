@@ -12,7 +12,7 @@ class Character:
         self._y = int(self._y / 2)
 
         self._life = 16 #max hp
-        self.life = 16
+        self.life = self._life
         self.recup = 0
 
         self.level = 1
@@ -40,6 +40,9 @@ class Character:
         if (self.recup == 100):
             self.recup = 0
             self.addLife(1)
+
+        if (self.life <= 0):
+            self.game.death = 1
 
     def draw(self):
         self._x, self._y = self.screen.getmaxyx()
@@ -79,7 +82,7 @@ class Character:
                 self.game.notify('You killed the ennemy %s' % (monsters[0].name))
                 _t = monsters[0].level * 2 + random.randrange(0, monsters[0].level * 10)
                 _g = random.randrange(0, monsters[0].level * 3)
-                self.exp += _t
+                self.exp += _t + 50
                 self.gold += _g
                 if _g == 0:
                     self.game.notify('You gain %d exp!' % (_t))
@@ -93,11 +96,28 @@ class Character:
                     self.next_lvl = self.level * 100
                     self._life += random.randrange(3 + (self.str / 2), 3 + self.str)
                     self.life = self._life
-                    #self.game.level_up_screen = 1
-                    self.game.notify('Level up !')
-                    self.str += self.lvl_up_str
-                    self.int += self.lvl_up_int
-                    self.agi += self.lvl_up_agi
+                    # #self.game.level_up_screen = 1
+                    # self.game.notify('Level up !')
+                    # self.str += self.lvl_up_str
+                    # self.int += self.lvl_up_int
+                    # self.agi += self.lvl_up_agi
+                    self.game.notify('Level up ! Choose an upgrade !(type : a -> agi | i -> int | s -> strengh)')
+                    while 1:
+                        c = chr(self.game.stdscr.getch())
+                        if c == 'a' or c == 's' or c == 'i':
+                            if c == 's':
+                                self.str + 1
+                                self.game.notify('You\'re str increased')
+                            if c == 'i':
+                                self.int + 1
+                                self.game.notify('You\'re int increased')
+                            if c == 'a':
+                                self.agi + 1
+                                self.game.notify('You\'re agi increased')
+                            break
+                        else:
+                            self.game.notify('You need to press a or s or i to level up.. Retry again !')
+                            self.game.draw()
                 self.game.monsters  = [a for a in self.game.monsters if a not in monsters]
 				#choose a bonus.
             return 0
@@ -117,10 +137,11 @@ class Character:
                     self.life = self._life
             else:
                 self.life -= random.randrange(5, 20)
-            if self.life <= 0:
-                self.game.notify('Game over !')
-                self.game.menu = 1
-            self.life
+            # if self.life <= 0:
+            #     self.game.notify('Game over !')
+            #     c = self.game.stdscr.getch()
+            #     self.game.menu = 1
+            # self.life
         elif (self.oldch == '휪'):
             g = int(random.random() * 10) + 2
             self.gold += g

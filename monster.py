@@ -74,7 +74,7 @@ class Monster:
 
             self.x += move[0]
             self.y += move[1]
-            self.game.draw()
+            self.game.screen.refresh()
 
     def draw(self, offset):
         max_width, max_height = self.screen.getmaxyx()
@@ -84,6 +84,7 @@ class Monster:
         if (_x >= 0 and _y >= 0
             and _x < max_width - 8 and _y < max_height):
                 self.screen.addstr(_x, _y, '!', curses.color_pair(MONSTER_COLOR))
+                self.game.screen.refresh()
 
     def collides(self, offset):
         max_width, max_height = self.screen.getmaxyx()
@@ -92,20 +93,17 @@ class Monster:
         if (_x >= 0 and _y >= 0
           and _x < max_width - 8 and _y < max_height):
             self.oldch = chr(self.screen.inch(_x, _y))
-            test = self.oldch.encode()
-            for value in test:
-                # err(value)
-                pass
             if (self.oldch == '祐' or self.oldch == ' ' or self.oldch == 'ȡ'):
                 return 0
             elif (self.oldch == 'ീ'):
                 _d = (self.atk - self.game.character.agi if self.atk - self.game.character.agi > 0 else 1)
                 self.game.notify('An ennemy %s hit you for %d' % (self.name, _d))
+                # self.game.death = 1
                 self.game.character.life -= _d
-                if self.game.character.life <= 0:
-                    self.game.notify('Game over ! Press any key to continue ...')
-                    c = self.game.stdscr.getch()
-                    self.game.menu = 1
+                # if self.game.character.life <= 0:
+                #     self.game.notify('Game over ! Press any key to continue ...')
+                #     c = self.game.stdscr.getch()
+                #     self.game.menu = 1
                 return 0
             return 1
         return 0
