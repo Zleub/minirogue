@@ -35,4 +35,3 @@ if __name__=='__main__':
         Game()
     except:
         end()
-        traceback.print_exc()

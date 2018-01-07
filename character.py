@@ -113,7 +113,7 @@ class Character:
                         else:
                             self.game.notify('You need to press a or s or i to level up.. Retry again !')
                             self.game.draw()
-                self.game.monsters  = [a for a in self.game.monsters if a not in monsters]
+                self.game.monsters  = [a for a in self.game.monsters if a not in [monsters[0]]]
 				#choose a bonus.
             return 0
         elif (self.oldch == '쭆'):

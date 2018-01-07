@@ -11,7 +11,7 @@ def end(msg):
     curses.curs_set(1)
     if (msg != ''):
         print(msg)
-    sys.exit(0)
+    sys.exit()
 
 class Game:
     def __init__(self):
@@ -151,7 +151,10 @@ class Game:
             max_width, max_height = self.stdscr.getmaxyx()
 
             if (max_height < 80 or max_width < 20):
-                end("Window too small, resize plz")
+                self.screen.clear()
+                self.screen.addstr(0, 0, "Window too small, resize plz")
+                self.screen.refresh()
+                continue
             self.draw()
             if (self.menu):
                 c = self.stdscr.getch()
