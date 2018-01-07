@@ -9,7 +9,8 @@ def end(msg):
     curses.nocbreak()
     curses.endwin()
     curses.curs_set(1)
-    print(msg)
+    if (msg != ''):
+        print(msg)
     sys.exit(0)
 
 class Game:
@@ -141,7 +142,7 @@ class Game:
             self.game = 1
             self.new_game()
         if (c == 10 and self.selected == 3):
-            end()
+            end('')
 
     def loop(self):
 
