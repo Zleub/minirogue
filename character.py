@@ -82,7 +82,7 @@ class Character:
                 self.game.notify('You killed the ennemy %s' % (monsters[0].name))
                 _t = monsters[0].level * 2 + random.randrange(0, monsters[0].level * 10)
                 _g = random.randrange(0, monsters[0].level * 3)
-                self.exp += _t + 50
+                self.exp += _t
                 self.gold += _g
                 if _g == 0:
                     self.game.notify('You gain %d exp!' % (_t))
