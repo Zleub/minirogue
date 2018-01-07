@@ -11,9 +11,13 @@ class Character:
         self._x = int(self._x / 2)
         self._y = int(self._y / 2)
 
-        self._life = 10
+        self._life = 10 #max hp
         self.life = 10
         self.recup = 0
+
+        self.level = 1
+        self.exp = 0
+        self.next_lvl = 100
 
         self.gold = 0
 
@@ -45,7 +49,11 @@ class Character:
             self.game.notify('You hit a %s' % (monsters[0].name))
             monsters[0].life -= (self.str - monsters[0].dfs if self.str - monsters[0].dfs > 0 else 1)
             if (monsters[0].life <= 0):
+                _t = monsters[0].level * 5 + random.randrange(0, monsters[0].level * 5)
+                self.exp += _t
+                self.game.notify('You gain %d exp!' % _t)
                 self.game.monsters  = [a for a in self.game.monsters if a not in monsters]
+				#choose a bonus.
             return 0
         elif (self.oldch == '휪'):
             g = int(random.random() * 10) + 2
@@ -56,6 +64,6 @@ class Character:
         return 1
 
     def toString(self):
-        return 'Life: %d / %d\tGold: %d\t\tSTR: %d\tAGI: %d\tINT: %d' % (
-            self.life, self._life, self.gold, self.str, self.agi, self.int
+        return 'Life: %d / %d\tGold: %d\t\tSTR: %d\tAGI: %d\tINT: %d \tEXP: %d%c' % (
+            self.life, self._life, self.gold, self.str, self.agi, self.int, self.exp / self.next_lvl * 100, '%'
         )

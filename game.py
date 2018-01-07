@@ -27,6 +27,8 @@ class Game:
 
         self.character = Character(self.screen, self)
 
+        self.level = 1
+
         self.golds = []
         self.paths = []
         self.monsters = []

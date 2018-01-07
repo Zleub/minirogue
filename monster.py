@@ -22,8 +22,10 @@ class Monster:
         self.life = self._life
         self.name = names[int(random.random() * len(names))]
 
-        self.atk = int(random.random() * 4) + 1
-        self.dfs = int(random.random() * 3) + 1
+        self.level = self.game.level
+
+        self.atk = int(random.random() * 4) + self.level
+        self.dfs = int(random.random() * 3) + self.level
 
     def update(self, offset):
         self.dst = math.sqrt(
@@ -97,7 +99,9 @@ class Monster:
             elif (self.oldch == 'ീ'):
                 self.game.notify('A %s hit you' % self.name)
                 self.game.character.life -= (self.atk - self.game.character.agi if self.atk - self.game.character.agi > 0 else 1)
-
+                if self.game.character.life <= 0:
+                    self.game.notify('Game over !')
+                    game.menu = 1
                 return 0
             return 1
         return 0
