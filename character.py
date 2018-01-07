@@ -11,8 +11,8 @@ class Character:
         self._x = int(self._x / 2)
         self._y = int(self._y / 2)
 
-        self._life = 10 #max hp
-        self.life = 10
+        self._life = 16 #max hp
+        self.life = 16
         self.recup = 0
 
         self.level = 1
@@ -24,6 +24,10 @@ class Character:
         self.str = 4
         self.agi = 4
         self.int = 4
+
+        self.lvl_up_str = 1
+        self.lvl_up_agi = 1
+        self.lvl_up_int = 1
 
     def addLife(self, v):
         if (self.life + v >= self._life):
@@ -44,10 +48,10 @@ class Character:
 
     def collides(self, offset):
         self.oldch = chr(self.screen.inch(self._x + offset[0], self._y + offset[1]))
-        # err('Character')
-        # err(self.oldch)
-        # test = self.oldch.encode()
-        # for value in test:
+        #err('Character')
+        #err(self.oldch)
+        #test = self.oldch.encode()
+         #for value in test:
             # err(value)
             # pass
         if (self.oldch == '祐' or self.oldch == ' '):
@@ -77,22 +81,21 @@ class Character:
                     self._life += random.randrange(3 + (self.str / 2), 3 + self.str)
                     self.life = self._life
                     #self.game.level_up_screen = 1
-                    self.game.notify('Level up ! Choose an upgrade !(type : a -> agi | i -> int | s -> strengh)')
-                    while 1:
-                        c = self.stdscr.getch()
-                        if c == 'a' or c == 's' or c == 'i':
-                            break
-                        else:
-                            self.game.notify('You need to press a or s or i to level up.. Retry again !')
-                    if c == 's':
-                        self.str + 1
-                    if c == 'i':
-                        self.int + 1
-                    if c == 'a':
-                        self.agi + 1
+                    self.game.notify('Level up !')
+                    self.str += self.lvl_up_str
+                    self.int += self.lvl_up_int
+                    self.agi += self.lvl_up_agi
                 self.game.monsters  = [a for a in self.game.monsters if a not in monsters]
 				#choose a bonus.
             return 0
+        elif (self.oldch == '쭆'):
+            if self.life == self._life:
+                self.game.notify('You found some food on the floor! But you\'re already full, come back later !')
+            else :
+                self.game.notify('You found some food on the floor! You eat it and restore your life !')
+                self.addLife(random.randrange(2, self.game.level * 3))
+                self.game.food = [a for a in self.game.food if a not in [[self.x + offset[0], self.y + offset[1]]]]
+                self.oldch = 'Į'
         elif (self.oldch == '휪'):
             g = int(random.random() * 10) + 2
             self.gold += g
@@ -102,6 +105,6 @@ class Character:
         return 1
 
     def toString(self):
-        return 'Life: %d / %d\tGold: %d\t\tSTR: %d\tAGI: %d\tINT: %d \tEXP: %d%c' % (
-            self.life, self._life, self.gold, self.str, self.agi, self.int, self.exp / self.next_lvl * 100, '%'
+        return 'Level: %d \tLife: %d / %d\tGold: %d\t\tSTR: %d\tAGI: %d\tINT: %d \tEXP: %d%c' % (
+            self.level, self.life, self._life, self.gold, self.str, self.agi, self.int, self.exp / self.next_lvl * 100, '%'
         )
