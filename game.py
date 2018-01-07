@@ -186,7 +186,6 @@ class Game:
                 self.draw()
                 if (t):
                     self.turns += 1
-                    err(self.turns)
                     for v in self.monsters:
                         v.update([self.offset[0] + self.screen_offset[0], self.offset[1] + self.screen_offset[1]])
                     if int(random.random() * 100) == 0:

@@ -100,6 +100,9 @@ class Monster:
                         self.life = self._life
                 else:
                     self.life -= random.randrange(5, 20)
+
+                if self.life <= 0:
+                    self.game.monsters  = [a for a in self.game.monsters if a not in [self]]
             elif (self.oldch == '祐' or self.oldch == ' ' or self.oldch == 'ȡ'):
                 return 0
             elif (self.oldch == 'ീ'):
